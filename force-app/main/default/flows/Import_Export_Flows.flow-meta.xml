@@ -3,8 +3,8 @@
     <actionCalls>
         <name>Create_Flow_XML_File</name>
         <label>Create Flow XML File</label>
-        <locationX>891</locationX>
-        <locationY>91</locationY>
+        <locationX>1483</locationX>
+        <locationY>20</locationY>
         <actionName>CreateFile</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -27,8 +27,8 @@
     <actionCalls>
         <name>Retrieve_Selected_Flow_Contents</name>
         <label>Retrieve Selected Flow Contents</label>
-        <locationX>1255</locationX>
-        <locationY>323</locationY>
+        <locationX>1750</locationX>
+        <locationY>293</locationY>
         <actionName>RetrieveFile</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -42,12 +42,11 @@
         </inputParameters>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
-    <apiVersion>50.0</apiVersion>
     <assignments>
         <name>Assign_DocumentId</name>
         <label>Assign DocumentId</label>
-        <locationX>1082</locationX>
-        <locationY>499</locationY>
+        <locationX>1573</locationX>
+        <locationY>453</locationY>
         <assignmentItems>
             <assignToReference>vDocumentId</assignToReference>
             <operator>Assign</operator>
@@ -62,8 +61,8 @@
     <assignments>
         <name>Assign_DocumentId_Collection</name>
         <label>Assign DocumentId Collection</label>
-        <locationX>941</locationX>
-        <locationY>325</locationY>
+        <locationX>1402</locationX>
+        <locationY>271</locationY>
         <assignmentItems>
             <assignToReference>colDocIds</assignToReference>
             <operator>Assign</operator>
@@ -92,10 +91,47 @@
         </value>
     </choices>
     <decisions>
-        <name>Check_Flow_File_Name</name>
+        <name>Import_Export_Selection</name>
+        <label>Import/Export Selection</label>
+        <locationX>1124</locationX>
+        <locationY>26</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>IMPORT_dec</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Import_or_Export_a_Flow</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <elementReference>Import</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Sandbox_KimbleSB3_Flow_Builder_Import_Export_Flows_V1_Free_Form_Version_1_Active</targetReference>
+            </connector>
+            <label>IMPORT</label>
+        </rules>
+        <rules>
+            <name>EXPORT_dec</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Import_or_Export_a_Flow</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <elementReference>Export</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Retrieve_Flow_Metadata</targetReference>
+            </connector>
+            <label>EXPORT</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Sandbox_KimbleSB3_Flow_Builder_Import_Export_Flows_V1_Free_Form_Version_1_Active</name>
         <label>Check Flow File Name</label>
-        <locationX>741</locationX>
-        <locationY>327</locationY>
+        <locationX>1231</locationX>
+        <locationY>273</locationY>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
             <name>FLOW_FILE</name>
@@ -128,48 +164,15 @@
             <label>NOT FLOW FILE</label>
         </rules>
     </decisions>
-    <decisions>
-        <name>Import_Export_Selection</name>
-        <label>Import/Export Selection</label>
-        <locationX>532</locationX>
-        <locationY>203</locationY>
-        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
-        <rules>
-            <name>IMPORT_dec</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>Import_or_Export_a_Flow</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <elementReference>Import</elementReference>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Check_Flow_File_Name</targetReference>
-            </connector>
-            <label>IMPORT</label>
-        </rules>
-        <rules>
-            <name>EXPORT_dec</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>Import_or_Export_a_Flow</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <elementReference>Export</elementReference>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Retrieve_Flow_Metadata</targetReference>
-            </connector>
-            <label>EXPORT</label>
-        </rules>
-    </decisions>
-    <description>Use this Flow to Import and Export Flows between Orgs</description>
     <formulas>
         <name>fFileName</name>
         <dataType>String</dataType>
         <expression>&quot;FLOW__&quot; &amp; {!SelectFlow.selectedFlowApiName} &amp; &quot;.flow-meta.xml&quot;</expression>
+    </formulas>
+    <formulas>
+        <name>fFileURL</name>
+        <dataType>String</dataType>
+        <expression>&quot;https://bjss--kimblesb4.sandbox.lightning.force.com/&quot; &amp; {!Create_Flow_XML_File.documentId}</expression>
     </formulas>
     <formulas>
         <name>fFlowAPIName</name>
@@ -179,12 +182,17 @@ MID({!FlowFileUpload.fileNames},8,LEN({!FlowFileUpload.fileNames})-22),
 MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</expression>
     </formulas>
     <formulas>
+        <name>fFlowID</name>
+        <dataType>String</dataType>
+        <expression>&quot;https://bjss--kimblesb4.sandbox.lightning.force.com/&quot; &amp; {!Get_Flow.Id}</expression>
+    </formulas>
+    <formulas>
         <name>fTestFlowFile</name>
         <dataType>Boolean</dataType>
         <expression>RIGHT({!FlowFileUpload.fileNames},15) = &quot;.flow-meta.xml]&quot;</expression>
     </formulas>
     <formulas>
-        <name>fUserId</name>
+        <name>fUserID</name>
         <dataType>String</dataType>
         <expression>{!$User.Id}</expression>
     </formulas>
@@ -193,8 +201,8 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <loops>
         <name>Loop_Retrieved_File</name>
         <label>Loop Retrieved File</label>
-        <locationX>1081</locationX>
-        <locationY>325</locationY>
+        <locationX>1571</locationX>
+        <locationY>280</locationY>
         <collectionReference>colDocIds</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -223,21 +231,41 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
         </value>
     </processMetadataValues>
     <processType>Flow</processType>
+    <recordLookups>
+        <name>Get_Flow</name>
+        <label>Get Flow</label>
+        <locationX>2051</locationX>
+        <locationY>304</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Import_Result</targetReference>
+        </connector>
+        <filters>
+            <field>ApiName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>fFlowAPIName</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>FlowDefinitionView</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <runInMode>DefaultMode</runInMode>
     <screens>
         <name>Deploy_Flow_Metadata</name>
         <label>Deploy Flow Metadata</label>
-        <locationX>1375</locationX>
-        <locationY>323</locationY>
+        <locationX>1928</locationX>
+        <locationY>299</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>Import_Result</targetReference>
+            <targetReference>Get_Flow</targetReference>
         </connector>
         <fields>
             <name>DeployFlow_fsc</name>
-            <extensionName>c:fsc_transferMetadata</extensionName>
+            <extensionName>c:fsc_transferMetadata3</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>metadataName</name>
@@ -272,8 +300,8 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <screens>
         <name>Error_Screen</name>
         <label>Error Screen</label>
-        <locationX>616</locationX>
-        <locationY>552</locationY>
+        <locationX>1057</locationX>
+        <locationY>277</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -282,7 +310,7 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
         </connector>
         <fields>
             <name>ErrorMessage</name>
-            <fieldText>&lt;p&gt;&lt;span style=&quot;color: rgb(255, 0, 0);&quot;&gt;Invalid Flow File Name!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;i&gt;{!FlowFileUpload.fileNames}&lt;/i&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;Flow metadata file names should end in &lt;/span&gt;&lt;b style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;.flow-meta.xml&lt;/b&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;.&lt;/span&gt;&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;&lt;span style=&quot;color: rgb(255, 0, 0);&quot;&gt;Invalid Flow File Name!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;em&gt;{!FlowFileUpload.fileNames}&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;Flow metadata file names should end in &lt;/span&gt;&lt;strong style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;.flow-meta.xml&lt;/strong&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(62, 62, 60);&quot;&gt;.&lt;/span&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -291,14 +319,14 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <screens>
         <name>Export_Result</name>
         <label>Export Result</label>
-        <locationX>1039</locationX>
-        <locationY>91</locationY>
-        <allowBack>false</allowBack>
+        <locationX>1685</locationX>
+        <locationY>31</locationY>
+        <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
-        <allowPause>false</allowPause>
+        <allowPause>true</allowPause>
         <fields>
             <name>ExportMessage</name>
-            <fieldText>&lt;p&gt;Flow successfully saved as &lt;b&gt;{!fFileName}&lt;/b&gt; &lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;&lt;span style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt;Flow successfully saved as &lt;/span&gt;&lt;a href=&quot;{!fFileURL}&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt;{!fFileName}&lt;/a&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -307,8 +335,8 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <screens>
         <name>Import_Export_Flows</name>
         <label>Import/Export Flows</label>
-        <locationX>381</locationX>
-        <locationY>201</locationY>
+        <locationX>946</locationX>
+        <locationY>32</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -336,12 +364,6 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
                 </value>
             </inputParameters>
             <inputParameters>
-                <name>recordId</name>
-                <value>
-                    <elementReference>fUserId</elementReference>
-                </value>
-            </inputParameters>
-            <inputParameters>
                 <name>accept</name>
                 <value>
                     <stringValue>.xml</stringValue>
@@ -351,6 +373,12 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
                 <name>multiple</name>
                 <value>
                     <booleanValue>false</booleanValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>recordId</name>
+                <value>
+                    <elementReference>fUserID</elementReference>
                 </value>
             </inputParameters>
             <isRequired>true</isRequired>
@@ -368,7 +396,7 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
         </fields>
         <fields>
             <name>SelectFlow</name>
-            <extensionName>c:flowPickerFSC</extensionName>
+            <extensionName>c:fsc_flowPicker3</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>componentWidth</name>
@@ -395,14 +423,14 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <screens>
         <name>Import_Result</name>
         <label>Import Result</label>
-        <locationX>1514</locationX>
-        <locationY>323</locationY>
-        <allowBack>false</allowBack>
+        <locationX>2230</locationX>
+        <locationY>291</locationY>
+        <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
-        <allowPause>false</allowPause>
+        <allowPause>true</allowPause>
         <fields>
             <name>ImportMessage</name>
-            <fieldText>&lt;p&gt;Flow &lt;b&gt;{!fFlowAPIName}&lt;/b&gt; successfully imported and deployed.&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;&lt;span style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt;Flow &lt;/span&gt;&lt;strong style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt;{!fFlowAPIName}&lt;/strong&gt;&lt;span style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt; successfully imported and deployed. &lt;/span&gt;&lt;a href=&quot;{!fFlowID}&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot; style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255);&quot;&gt;{!fFlowID}&lt;/a&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -411,8 +439,8 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
     <screens>
         <name>Retrieve_Flow_Metadata</name>
         <label>Retrieve Flow Metadata</label>
-        <locationX>746</locationX>
-        <locationY>91</locationY>
+        <locationX>1325</locationX>
+        <locationY>25</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -421,7 +449,7 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
         </connector>
         <fields>
             <name>RetrieveFlow_usf</name>
-            <extensionName>c:fsc_transferMetadata</extensionName>
+            <extensionName>c:fsc_transferMetadata3</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>metadataName</name>
@@ -448,18 +476,13 @@ MID({!FlowFileUpload.fileNames},2,LEN({!FlowFileUpload.fileNames})-16))</express
         <showHeader>true</showHeader>
     </screens>
     <start>
-        <locationX>50</locationX>
-        <locationY>50</locationY>
+        <locationX>650</locationX>
+        <locationY>48</locationY>
         <connector>
             <targetReference>Import_Export_Flows</targetReference>
         </connector>
     </start>
     <status>Active</status>
-    <textTemplates>
-        <name>ttExportSuccess</name>
-        <isViewedAsPlainText>true</isViewedAsPlainText>
-        <text>Successfully saved the Flow file as {!fFileName}</text>
-    </textTemplates>
     <variables>
         <name>colDocIds</name>
         <dataType>String</dataType>
